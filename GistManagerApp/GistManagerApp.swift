@@ -51,7 +51,7 @@ enum GroupType: Hashable {
 
 // MARK: - Main App
 @main
-struct GistManagerApp: App {
+struct GistMangerApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
@@ -94,6 +94,10 @@ struct ContentView: View {
                     description: Text("Choose a gist from the list to view and edit its details")
                 )
             }
+        }
+        .onChange(of: selectedGroup) {
+            // Clear selected gist when switching groups/smart folders
+            selectedGist = nil
         }
     }
     
