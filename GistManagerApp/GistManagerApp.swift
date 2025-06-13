@@ -1,5 +1,6 @@
 import SwiftData
 import SwiftUI
+import HighlightSwift
 
 // MARK: - Data Models
 @Model
@@ -10,7 +11,7 @@ class Gist {
     var programmingLanguage: String
     var hashtags: [String]
     var creationDate: Date
-
+    
     init(
         title: String = "",
         gistContent: String = "",
@@ -30,7 +31,7 @@ enum GroupType: Hashable {
     case language(String)
     case hashtag(String)
     case all
-
+    
     var displayName: String {
         switch self {
         case .language(let lang):
@@ -41,7 +42,7 @@ enum GroupType: Hashable {
             return "All Gists"
         }
     }
-
+    
     var icon: String {
         switch self {
         case .language:
@@ -72,8 +73,19 @@ struct ContentView: View {
     @State private var selectedGroup: GroupType? = .all
     @State private var selectedGist: Gist?
     @State private var columnVisibility = NavigationSplitViewVisibility.all
-
+    
+    //    var highlight: Highlight = Highlight()
+    //
+    //    let someCode = """
+    //        print(\"Hello World\")
+    //        """
+    
     var body: some View {
+        
+        //        CodeText(someCode)
+        //            .highlightLanguage(.swift)
+        
+        
         NavigationSplitView(columnVisibility: $columnVisibility) {
             // First Column - Groups
             GroupSidebarView(
@@ -107,7 +119,7 @@ struct ContentView: View {
             selectedGist = nil
         }
     }
-
+    
     private var filteredGists: [Gist] {
         switch selectedGroup {
         case .all:
@@ -128,7 +140,7 @@ struct ContentView: View {
 struct GroupSidebarView: View {
     let gists: [Gist]
     @Binding var selectedGroup: GroupType?
-
+    
     var body: some View {
         VStack {
             List(selection: $selectedGroup) {
@@ -136,18 +148,18 @@ struct GroupSidebarView: View {
                     NavigationLink(value: GroupType.all) {
                         Label("All Gists", systemImage: "doc.text")
                     }
-
+                    
                     ForEach(uniqueLanguages, id: \.self) { language in
                         NavigationLink(value: GroupType.language(language)) {
                             Label(
                                 language.isEmpty
-                                    ? "Unknown Language" : language,
+                                ? "Unknown Language" : language,
                                 systemImage: "curlybraces"
                             )
                         }
                     }
                 }
-
+                
                 if !uniqueHashtags.isEmpty {
                     Section("Hashtags") {
                         ForEach(uniqueHashtags, id: \.self) { hashtag in
@@ -159,7 +171,7 @@ struct GroupSidebarView: View {
                 }
             }
             .navigationTitle("Code Gists")
-
+            
             // Attribution at bottom
             VStack(spacing: 2) {
                 Text("James Alan Bush")
@@ -172,11 +184,11 @@ struct GroupSidebarView: View {
             .padding(.bottom, 8)
         }
     }
-
+    
     private var uniqueLanguages: [String] {
         Array(Set(gists.map { $0.programmingLanguage })).sorted()
     }
-
+    
     private var uniqueHashtags: [String] {
         Array(Set(gists.flatMap { $0.hashtags })).sorted()
     }
@@ -188,7 +200,7 @@ struct GistListView: View {
     @Binding var selectedGist: Gist?
     let selectedGroup: GroupType?
     let modelContext: ModelContext
-
+    
     var body: some View {
         List(selection: $selectedGist) {
             ForEach(gists) { gist in
@@ -207,24 +219,24 @@ struct GistListView: View {
             }
         }
     }
-
+    
     private func addGist() {
         let newGist = Gist(title: "New Gist")
         modelContext.insert(newGist)
-
+        
         // Auto-save first
         do {
             try modelContext.save()
         } catch {
             print("Failed to save new gist: \(error)")
         }
-
+        
         // Delay selection to allow SwiftData to update
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             selectedGist = newGist
         }
     }
-
+    
     private func deleteGists(offsets: IndexSet) {
         for index in offsets {
             let gist = gists[index]
@@ -233,7 +245,7 @@ struct GistListView: View {
             }
             modelContext.delete(gist)
         }
-
+        
         // Auto-save
         do {
             try modelContext.save()
@@ -246,13 +258,13 @@ struct GistListView: View {
 // MARK: - Gist Row View
 struct GistRowView: View {
     let gist: Gist
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(gist.title.isEmpty ? "Untitled Gist" : gist.title)
                 .font(.headline)
                 .lineLimit(1)
-
+            
             HStack {
                 if !gist.programmingLanguage.isEmpty {
                     Text(gist.programmingLanguage)
@@ -262,14 +274,14 @@ struct GistRowView: View {
                         .background(Color.blue.opacity(0.2))
                         .cornerRadius(4)
                 }
-
+                
                 Spacer()
-
+                
                 Text(gist.creationDate, style: .date)
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
-
+            
             if !gist.hashtags.isEmpty {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 4) {
@@ -295,7 +307,9 @@ struct GistDetailView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var hashtagInput = ""
     @FocusState private var isHashtagFieldFocused: Bool
-
+    
+    var highlight: Highlight = Highlight()
+    
     // Programming languages for dropdown
     private let programmingLanguages = [
         "Swift", "Objective-C", "JavaScript", "TypeScript", "Python", "Java",
@@ -309,13 +323,13 @@ struct GistDetailView: View {
         "ActionScript", "CoffeeScript", "Elm", "PureScript", "ReasonML",
         "OCaml", "Scheme", "Racket",
     ].sorted()
-
+    
     var body: some View {
         Form {
             Section("Basic Information") {
                 TextField("Title", text: $gist.title)
                     .font(.title2)
-
+                
                 Picker(
                     "Programming Language",
                     selection: $gist.programmingLanguage
@@ -325,7 +339,7 @@ struct GistDetailView: View {
                         Text(language).tag(language)
                     }
                 }
-
+                
                 HStack {
                     Text("Created:")
                     Spacer()
@@ -333,7 +347,7 @@ struct GistDetailView: View {
                         .foregroundColor(.secondary)
                 }
             }
-
+            
             Section("Hashtags") {
                 if !gist.hashtags.isEmpty {
                     LazyVGrid(
@@ -361,14 +375,14 @@ struct GistDetailView: View {
                         }
                     }
                 }
-
+                
                 HStack {
                     TextField("Add hashtag", text: $hashtagInput)
                         .focused($isHashtagFieldFocused)
                         .onSubmit {
                             addHashtag()
                         }
-
+                    
                     Button("Add", action: addHashtag)
                         .disabled(
                             hashtagInput.trimmingCharacters(
@@ -377,21 +391,77 @@ struct GistDetailView: View {
                         )
                 }
             }
-
+            
             Section("Code") {
-                TextEditor(text: $gist.gistContent)
-                    .font(.system(.body, design: .monospaced))
-                    .frame(minHeight: 300)
+                
+                TabView {
+                    TextEditor(text: $gist.gistContent) // make scrollable
+                        .textEditorStyle(.plain)
+                        .font(.system(.body, design: .monospaced))
+                        .tabItem {
+                            Label("Editor", systemImage: "pencil")
+                        }
+                    
+                    let someCode = """
+\(gist.gistContent)
+"""
+                    
+                    CodeText(someCode)
+                        .highlightLanguage(.swift)
+                        .tabItem {
+                            Label("Preview", systemImage: "eye.circle")
+                                .tabItem {
+                                    Label("Library", systemImage: "square.stack")
+                                }
+                        }
+                        .tabViewStyle(DefaultTabViewStyle())
+                }
+                .frame(width: .infinity, height: 200)
             }
+//            .scaledToFill()
+//                TabView {
+//                    TextEditor(text: $gist.gistContent) // make scrollable
+//                        .font(.system(.body, design: .monospaced))
+//                        .tabItem {
+//                            Label("First", systemImage: "1.circle")
+//                        }
+//                    
+//                    let someCode = """
+//                                    \(gist.gistContent)
+//                                    """
+//                    
+//                    CodeText(someCode)
+//                        .highlightLanguage(.swift)
+//                        .tabItem {
+//                            Label("Second", systemImage: "2.circle")
+//                        }
+//                }
+//                .frame(width: .infinity, height: 200)
+//            }
+            
+            //                TabView {
+            //                    Tab {
+            //                        TextEditor(text: $gist.gistContent) // make scrollable
+            //                            .font(.system(.body, design: .monospaced))
+            //                    }
+            //
+            //                    Tab {
+            //                        VStack {
+            //                            let someCode = """
+            //                                    \(gist.gistContent)
+            //                                    """
+            //
+            //                            CodeText(someCode)
+            //                                .highlightLanguage(.swift)
+            //                        }
+            //                        .tabItem {
+            //                            Text("Preview")
+            //                        }
+            //                    }
+            //                }
         }
-        .navigationTitle("Gist Details")
-        .navigationBarTitleDisplayMode(.inline)
-        .onChange(of: gist.title) { autoSave() }
-        .onChange(of: gist.gistContent) { autoSave() }
-        .onChange(of: gist.programmingLanguage) { autoSave() }
-        .onChange(of: gist.hashtags) { autoSave() }
     }
-
+    
     private func addHashtag() {
         let trimmedTag = hashtagInput.trimmingCharacters(
             in: .whitespacesAndNewlines
@@ -399,18 +469,18 @@ struct GistDetailView: View {
         guard !trimmedTag.isEmpty && !gist.hashtags.contains(trimmedTag) else {
             return
         }
-
+        
         gist.hashtags.append(trimmedTag)
         hashtagInput = ""
         isHashtagFieldFocused = false
         autoSave()
     }
-
+    
     private func removeHashtag(_ hashtag: String) {
         gist.hashtags.removeAll { $0 == hashtag }
         autoSave()
     }
-
+    
     private func autoSave() {
         do {
             try modelContext.save()
