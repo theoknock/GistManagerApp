@@ -221,7 +221,7 @@ struct GistListView: View {
     }
     
     private func addGist() {
-        let newGist = Gist(title: "New Gist")
+        let newGist = Gist(title: "")
         modelContext.insert(newGist)
         
         // Auto-save first
@@ -277,9 +277,9 @@ struct GistRowView: View {
                 
                 Spacer()
                 
-                Text(gist.creationDate, style: .date)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+//                Text(gist.creationDate, style: .date)
+//                    .font(.caption)
+//                    .foregroundColor(.secondary)
             }
             
             if !gist.hashtags.isEmpty {
@@ -328,32 +328,30 @@ struct GistDetailView: View {
     
     var body: some View {
         Form {
-            Section("Basic Information") {
-                TextField("Title", text: $gist.title)
+            Section("") {
+                TextField("Untitled Gist", text: $gist.title)
                     .font(.title2)
                 
-                Picker(
-                    "Programming Language",
-                    selection: $gist.programmingLanguage
-                ) {
-                    Text("Select Language").tag("")
-                    ForEach(programmingLanguages, id: \.self) { language in
-                        Text(language).tag(language)
-                    }
-                }
+//                Picker(
+//                    "Programming Language",
+//                    selection: $gist.programmingLanguage
+//                ) {
+//                    Text("Select Language").tag("")
+//                    ForEach(programmingLanguages, id: \.self) { language in
+//                        Text(language).tag(language)
+//                    }
+//                }
                 
-                HStack {
-                    Text("Created:")
-                    Spacer()
-                    Text(gist.creationDate, style: .date)
-                        .foregroundColor(.secondary)
-                }
+//                HStack {
+//                    Text("Created:")
+//                    Spacer()
+//                    Text(gist.creationDate, style: .date)
+//                        .foregroundColor(.secondary)
+//                }
             }
             
             Section("Hashtags") {
                 if !gist.hashtags.isEmpty {
-                    
-                    
                     LazyVGrid  (
                         columns: [
                             GridItem(.adaptive(minimum: 80))
@@ -396,16 +394,15 @@ struct GistDetailView: View {
                 }
             }
         }
-            
-            Section("Code") {
-                GeometryReader { geometry in
-                    VStack {
-                        CodeEditorViewRE()
-//                            .frame(height: geometry.size.height / 2)
-                    }
+        .scrollDisabled(true)
+        
+        Section("") {
+            GeometryReader { geometry in
+                VStack {
+                    CodeEditorViewRE()
                 }
             }
-//        }
+        }
     }
     
     private func addHashtag() {
@@ -441,5 +438,5 @@ struct GistDetailView: View {
     ContentView()
         .modelContainer(for: Gist.self, inMemory: true)
         .preferredColorScheme(.dark)
-
+    
 }

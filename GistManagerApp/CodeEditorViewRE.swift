@@ -69,6 +69,9 @@ struct CodeEditorViewRE: View {
                             .tag(language)
                     }
                 }
+                
+                Spacer()
+                
                 Picker("", selection: $theme) {
                     ForEach(CodeEditor.availableThemes) { theme in
                         Text("\(theme.rawValue.capitalized)")
@@ -76,7 +79,8 @@ struct CodeEditorViewRE: View {
                     }
                 }
             }
-            .padding()
+            .background(Color(.systemGray6))
+//            .padding()
             
             Divider()
             
