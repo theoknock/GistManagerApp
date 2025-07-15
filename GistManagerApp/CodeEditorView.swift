@@ -12,37 +12,49 @@ struct CodeEditorView: View {
     
     var body: some View {
         VStack(spacing: 0) {
+            HStack(alignment: .center, content: {
+                HStack {
+                    Picker("Language", selection: $language) {
+                        ForEach(CodeEditor.availableLanguages) { language in
+                            Text("\(language.rawValue.capitalized)")
+                                .font(.system(.body))
+                                .dynamicTypeSize(.xSmall ... .xxLarge)
+                                .tag(language)
+                        }
+                    }
+                }.border(Color.red, width: 1.0)
+                HStack {
+                    Picker("Theme", selection: $theme) {
+                        ForEach(CodeEditor.availableThemes) { theme in
+                            Text("\(theme.rawValue.capitalized)")
+                                .font(.system(.body))
+                                .dynamicTypeSize(.xSmall ... .xxLarge)
+                                .tag(theme)
+                        }
+                    }
+                }.border(Color.blue, width: 1.0)
+            }).border(Color.blue, width: 1.0)
+            
+            //            Divider()
+            
             HStack {
-                Picker("Language", selection: $language) {
-                    ForEach(CodeEditor.availableLanguages) { language in
-                        Text("\(language.rawValue.capitalized)")
-                            .tag(language)
-                    }
-                }
-                Picker("Theme", selection: $theme) {
-                    ForEach(CodeEditor.availableThemes) { theme in
-                        Text("\(theme.rawValue.capitalized)")
-                            .tag(theme)
-                    }
-                }
-            }
-            .padding()
-            
-            Divider()
-            
 #if os(macOS)
-            CodeEditor(source: $source, language: language, theme: theme,
-                       fontSize: .init(get: { CGFloat(fontSize)  },
-                                       set: { fontSize = Int($0) }))
-            .frame(minWidth: 640, minHeight: 480)
+                CodeEditor(source: $source, language: language, theme: theme,
+                           fontSize: .init(get: { CGFloat(fontSize)  },
+                                           set: { fontSize = Int($0) }))
+                .frame(minWidth: 640, minHeight: 480)
 #else
-            CodeEditor(source: $source, language: language, theme: theme)
+                CodeEditor(source: $source, language: language, theme: theme)
+                    .frame(minWidth: UIScreen.main.bounds.width, maxHeight: UIScreen.main.bounds.height)
 #endif
-        }
+            }.border(Color.blue, width: 1.0)
+            
+        }.border(Color.green, width: 1.0)
+        .padding()
     }
 }
 
-struct CCodeEditorView_Previews: PreviewProvider {
+struct CodeEditorView_Previews: PreviewProvider {
     static var previews: some View {
         CodeEditorView()
             .preferredColorScheme(.dark)

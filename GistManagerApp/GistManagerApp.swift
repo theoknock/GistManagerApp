@@ -308,6 +308,8 @@ struct GistDetailView: View {
     @State private var hashtagInput = ""
     @FocusState private var isHashtagFieldFocused: Bool
     
+    @FocusState private var isEditorFocused: Bool
+    
     var highlight: Highlight = Highlight()
     
     // Programming languages for dropdown
@@ -350,7 +352,9 @@ struct GistDetailView: View {
             
             Section("Hashtags") {
                 if !gist.hashtags.isEmpty {
-                    LazyVGrid(
+                    
+                    
+                    LazyVGrid  (
                         columns: [
                             GridItem(.adaptive(minimum: 80))
                         ],
@@ -391,75 +395,17 @@ struct GistDetailView: View {
                         )
                 }
             }
+        }
             
             Section("Code") {
-                
-                TabView {
-                    TextEditor(text: $gist.gistContent) // make scrollable
-                        .textEditorStyle(.plain)
-                        .font(.system(.body, design: .monospaced))
-                        .tabItem {
-                            Label("Editor", systemImage: "pencil")
-                        }
-                    
-                    let someCode = """
-\(gist.gistContent)
-"""
-                    
-                    CodeText(someCode)
-                        .highlightLanguage(.swift)
-                        .tabItem {
-                            Label("Preview", systemImage: "eye.circle")
-                                .tabItem {
-                                    Label("Library", systemImage: "square.stack")
-                                }
-                        }
-                        .tabViewStyle(DefaultTabViewStyle())
+                GeometryReader { geometry in
+                    VStack {
+                        CodeEditorViewRE()
+//                            .frame(height: geometry.size.height / 2)
+                    }
                 }
-                .frame(width: .infinity, height: 200)
             }
-//            .scaledToFill()
-//                TabView {
-//                    TextEditor(text: $gist.gistContent) // make scrollable
-//                        .font(.system(.body, design: .monospaced))
-//                        .tabItem {
-//                            Label("First", systemImage: "1.circle")
-//                        }
-//                    
-//                    let someCode = """
-//                                    \(gist.gistContent)
-//                                    """
-//                    
-//                    CodeText(someCode)
-//                        .highlightLanguage(.swift)
-//                        .tabItem {
-//                            Label("Second", systemImage: "2.circle")
-//                        }
-//                }
-//                .frame(width: .infinity, height: 200)
-//            }
-            
-            //                TabView {
-            //                    Tab {
-            //                        TextEditor(text: $gist.gistContent) // make scrollable
-            //                            .font(.system(.body, design: .monospaced))
-            //                    }
-            //
-            //                    Tab {
-            //                        VStack {
-            //                            let someCode = """
-            //                                    \(gist.gistContent)
-            //                                    """
-            //
-            //                            CodeText(someCode)
-            //                                .highlightLanguage(.swift)
-            //                        }
-            //                        .tabItem {
-            //                            Text("Preview")
-            //                        }
-            //                    }
-            //                }
-        }
+//        }
     }
     
     private func addHashtag() {
@@ -494,4 +440,6 @@ struct GistDetailView: View {
 #Preview {
     ContentView()
         .modelContainer(for: Gist.self, inMemory: true)
+        .preferredColorScheme(.dark)
+
 }
